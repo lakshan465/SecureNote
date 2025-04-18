@@ -46,7 +46,9 @@ public class SecurityConfig {
 
     @Bean
     SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
-        http.authorizeHttpRequests((requests) -> requests
+        http
+                .cors(withDefaults())
+                .authorizeHttpRequests((requests) -> requests
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
                 //.requestMatchers("/public/**").permitAll()
                 .requestMatchers("/api/csrf-token").permitAll()
@@ -120,6 +122,8 @@ public class SecurityConfig {
             }
         };
     }
+
+
 
 //    @Bean
 //    public UserDetailsService userDetailsService(DataSource dataSource) {

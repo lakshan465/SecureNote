@@ -22,7 +22,8 @@ const AllNotes = () => {
       }));
       setNotes(parsedNotes);
     } catch (error) {
-      setError(error.response.data.message);
+      const errMsg = error.response?.data?.message || "Failed to fetch notes";
+      setError(errMsg);
       console.error("Error fetching notes", error);
     } finally {
       setLoading(false);
