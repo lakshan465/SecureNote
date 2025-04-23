@@ -164,6 +164,10 @@ public class AuthController {
         return (userDetails!=null)? userDetails.getUsername() : "" ;
     }
 
+    @PostMapping("/public/forgot-password")
+    public ResponseEntity<?> forgotPassword(@RequestParam String email){
+
+    }
 
 
 

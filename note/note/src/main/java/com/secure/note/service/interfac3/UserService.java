@@ -1,6 +1,7 @@
 package com.secure.note.service.interfac3;
 
 import com.secure.note.dto.UserDTO;
+import com.secure.note.entity.Role;
 import com.secure.note.entity.User;
 
 import java.util.List;
@@ -14,5 +15,17 @@ public interface UserService {
 
     User findByUsername(String username);
 
+
+    public void updateAccountLockStatus(Long userId, boolean lock);
+
+    List<Role> getAllRoles();
+
+    void updateAccountExpiryStatus(Long userId, boolean expire);
+
+    void updateAccountEnabledStatus(Long userId, boolean enabled);
+
+    void updateCredentialsExpiryStatus(Long userId, boolean expire);
+
+    void updatePassword(Long userId, String password);
 }
 
