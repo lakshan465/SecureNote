@@ -1,5 +1,6 @@
 package com.secure.note.security;
 
+import com.secure.note.config.OAuth2LoginSuccessHandler;
 import com.secure.note.entity.Role;
 import com.secure.note.enums.AppRole;
 import com.secure.note.repo.RoleRepository;
@@ -10,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -37,6 +39,9 @@ public class SecurityConfig {
 
     @Autowired
     private AuthEntryPointJwt unauthorizedHandler;
+    @Autowired
+    @Lazy
+    OAuth2LoginSuccessHandler successHandler;
 
     @Bean
     public AuthTokenFilter authenticationJwtTokenFilter() {
@@ -49,11 +54,15 @@ public class SecurityConfig {
         http
                 .cors(withDefaults())
                 .authorizeHttpRequests((requests) -> requests
-                .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                //.requestMatchers("/public/**").permitAll()
-                .requestMatchers("/api/csrf-token").permitAll()
-                .requestMatchers("/api/auth/public/**").permitAll()
-                .anyRequest().authenticated());
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                        //.requestMatchers("/public/**").permitAll()
+                        .requestMatchers("/api/csrf-token").permitAll()
+                        .requestMatchers("/api/auth/public/**").permitAll()
+                        .requestMatchers("/oauth2/**").permitAll()
+                        .anyRequest().authenticated())
+                .oauth2Login(oauth -> {
+                    oauth.successHandler(successHandler);
+                });
         http.exceptionHandling(exception ->
                 exception.authenticationEntryPoint(unauthorizedHandler));
         http.addFilterBefore(authenticationJwtTokenFilter(),
@@ -122,7 +131,6 @@ public class SecurityConfig {
             }
         };
     }
-
 
 
 //    @Bean

@@ -10,6 +10,7 @@ import com.secure.note.repo.PasswordResetTokenRepository;
 import com.secure.note.repo.RoleRepository;
 import com.secure.note.repo.UserRepository;
 import com.secure.note.service.interfac3.UserService;
+import com.secure.note.util.EmailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -37,6 +38,11 @@ public class UserServiceImpl implements UserService {
 
     @Value("${frontend.url}")
     String frontendUrl;
+
+    @Autowired
+    EmailService emailService;
+    @Autowired
+    private PasswordResetTokenRepository passwordResetTokenRepository;
 
 
     @Override
@@ -150,5 +156,37 @@ public class UserServiceImpl implements UserService {
                 .build();
         pwTokenRepository.save(passwordResetToken);
         String resetUrl = frontendUrl + "/reset-password?token=" + token;
+
+        //send email
+        emailService.sendPasswordResetEmail(email, resetUrl);
+    }
+
+    @Override
+    public void resetPassword(String token, String newPassword) {
+        PasswordResetToken pwdresetTkn = passwordResetTokenRepository.findByToken(token)
+                .orElseThrow(()-> new RuntimeException("Token not found"));
+
+        if(pwdresetTkn.isUsed())
+            throw new RuntimeException("Password reset is used");
+
+        if(pwdresetTkn.getExpiryDate().isBefore(Instant.now()))
+            throw new RuntimeException("Password reset is expired");
+        User user = pwdresetTkn.getUser();
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+        pwdresetTkn.setUsed(true);
+        passwordResetTokenRepository.save(pwdresetTkn);
+    }
+
+    @Override
+    public Optional<User> findByEmail(String email) {
+        return userRepository.findByEmail(email);
+    }
+
+    @Override
+    public User registerUser(User newUser) {
+        if(newUser.getPassword() != null)
+            newUser.setPassword(passwordEncoder.encode(newUser.getPassword()));
+        return userRepository.save(newUser);
     }
 }

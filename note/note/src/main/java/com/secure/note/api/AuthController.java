@@ -166,13 +166,25 @@ public class AuthController {
 
     @PostMapping("/public/forgot-password")
     public ResponseEntity<?> forgotPassword(@RequestParam String email){
-
+        try {
+            userService.generatePasswordResetToken(email);
+            return ResponseEntity.ok().body(new MessageResponse("Password reset email send"));
+        }catch (Exception e){
+            return ResponseEntity.badRequest().body(new MessageResponse("Error: Invalid email!"));
+        }
     }
 
+    @PostMapping("/public/reset-password")
+    public ResponseEntity<?> resetPassword(@RequestParam String token, @RequestParam String newPassword){
+        try{
+            userService.resetPassword(token,newPassword);
+            return ResponseEntity.ok().body(new MessageResponse("Password reset successful!"));
 
+        }catch (Exception e){
+            return ResponseEntity.badRequest().body(new MessageResponse(e.getMessage()));
+        }
 
-
-
+    }
 
 }
 
